@@ -17,6 +17,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
 /* floating glow */
@@ -139,6 +140,17 @@ textarea {
   from { transform: translateY(100vh); }
   to { transform: translateY(-10vh); }
 }
+
+/* ===== Bury Animation ===== */
+.bury {
+  animation: buryMessage 1s forwards;
+}
+
+@keyframes buryMessage {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  50% { transform: translateY(40px) rotate(-15deg); opacity: 0.5; }
+  100% { transform: translateY(100px) rotate(-30deg); opacity: 0; }
+}
 </style>
 </head>
 
@@ -236,10 +248,13 @@ function writeSpace() {
     </div>
 
     <p class="small">Nothing here is saved or shared.</p>
-    <button onclick="home()">Back</button>
+
+    <div class="buttons">
+      <button onclick="trashMessage()">Trash</button>
+      <button onclick="home()">Back</button>
+    </div>
   `);
 
-  // rotate encouragements every 12 seconds
   encouragementInterval = setInterval(() => {
     const msg = encouragements[Math.floor(Math.random() * encouragements.length)];
     document.getElementById("encouragement").style.opacity = 0;
@@ -249,7 +264,6 @@ function writeSpace() {
     }, 500);
   }, 12000);
 
-  // rotate writing facts every 12 seconds
   factInterval = setInterval(() => {
     const fact = writingFacts[Math.floor(Math.random() * writingFacts.length)];
     document.getElementById("writingFact").style.opacity = 0;
@@ -258,6 +272,18 @@ function writeSpace() {
       document.getElementById("writingFact").style.opacity = 0.8;
     }, 500);
   }, 12000);
+}
+
+function trashMessage() {
+  const textarea = document.querySelector("textarea");
+  if (!textarea) return;
+
+  textarea.classList.add("bury");
+  textarea.disabled = true;
+
+  setTimeout(() => {
+    transition(`<h2>Message Buried 💨</h2><button onclick="home()">Back</button>`);
+  }, 1000);
 }
 
 function home() {
