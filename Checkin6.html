@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Check-in</title>
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background-color: #6a0dad;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    text-align: center;
+    max-width: 800px;
+    padding: 25px;
+  }
+
+  button {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 12px 28px;
+    margin: 10px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: rgba(255,255,255,0.15);
+  }
+
+  textarea {
+    width: 100%;
+    height: 260px;
+    padding: 14px;
+    font-size: 1rem;
+    margin-top: 15px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 6px;
+    border: none;
+  }
+
+  .breath {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 4px solid black;
+    margin: 25px auto;
+    animation: breathe 6s infinite;
+  }
+
+  @keyframes breathe {
+    0% { transform: scale(1); opacity: .6; }
+    50% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1); opacity: .6; }
+  }
+</style>
+</head>
+
+<body>
+<div class="container" id="main">
+  <h1>How’ve you been?</h1>
+  <button onclick="bad()">Bad</button>
+  <button onclick="good()">Good</button>
+</div>
+
+<script>
+const main = document.getElementById('main');
+
+const groundingQuotes = [
+  "You don’t need certainty to survive this moment.",
+  "This pain means something mattered.",
+  "Let the urge rise and fall without acting on it.",
+  "You are allowed to pause instead of reaching.",
+  "Nothing is being decided today."
+];
+
+function randomQuote() {
+  return groundingQuotes[Math.floor(Math.random() * groundingQuotes.length)];
+}
+
+function bad() {
+  showCheckIn("I’m sorry, I miss you lots and I didn’t wanted to reach out and I knew I couldnt, but I needed something to focus on.");
+}
+
+function good() {
+  showCheckIn("I glad you are doing better, I’m using this as a distraction to help me get through the day.");
+}
+
+function showCheckIn(msg) {
+  main.innerHTML = `
+    <p>${msg}</p>
+    <button onclick="talk()">Do you want to talk?</button>
+    <button onclick="closePage()">I don’t want to talk</button>
+  `;
+}
+
+function closePage() {
+  window.close();
+}
+
+function talk() {
+  main.innerHTML = `
+    <h2>Breathe first</h2>
+    <div class="breath"></div>
+    <p>You don’t need to decide anything right now.</p>
+    <p style="font-style:italic;">${randomQuote()}</p>
+    <button onclick="startWriting()">I’m ready</button>
+  `;
+}
+
+/*  renamed from write() to startWriting() */
+function startWriting() {
+  main.innerHTML = `
+    <h3>Say what you need to say. Nothing is recorded here. Showing change through restraint. Showing change throught actions and not through words. </h3>
+    <textarea placeholder="Type freely. No one will read this."></textarea>
+
+    <div>
+      <button onclick="panicMode()">Panic Mode</button>
+      <button onclick="lockTonight()">Don’t text tonight</button>
+      <button onclick="sleepTimer()">Sleep countdown</button>
+      <button onclick="saveSurvived()">I survived today</button>
+    </div>
+
+    <div id="log" style="margin-top:30px;"></div>
+  `;
+
+  setTimeout(showLog, 50);
+}
+
+function panicMode() {
+  main.innerHTML = `
+    <h2>You are ok right now.</h2>
+    <p>This feeling will crest and fall.</p>
+    <p>Breathe slowly. No messages tonight.</p>
+  `;
+}
+
+function lockTonight() {
+  const hours = prompt("How many hours do you want to lock this?", "8");
+  if (!hours) return;
+
+  main.innerHTML = `
+    <h2>Locked for ${hours} hours</h2>
+    <p>You chose rest over pain.</p>
+    <p>You can revisit this after the lock ends.</p>
+  `;
+
+  setTimeout(() => location.reload(), hours * 3600000);
+}
+
+function sleepTimer() {
+  const mins = prompt("Minutes until sleep?", "60");
+  if (!mins) return;
+
+  let remaining = mins * 60;
+
+  main.innerHTML = `
+    <h2 id="timer"></h2>
+    <p>The only job is to get through tonight.</p>
+  `;
+
+  const interval = setInterval(() => {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    document.getElementById("timer").innerText =
+      `${m}:${s.toString().padStart(2,'0')} until rest`;
+    remaining--;
+    if (remaining < 0) clearInterval(interval);
+  }, 1000);
+}
+
+function saveSurvived() {
+  const today = new Date().toLocaleDateString();
+  let log = JSON.parse(localStorage.getItem("survivalLog")) || [];
+  log.push(`I survived ${today}`);
+  localStorage.setItem("survivalLog", JSON.stringify(log));
+  showLog();
+}
+
+function showLog() {
+  const logDiv = document.getElementById("log");
+  if (!logDiv) return;
+
+  const log = JSON.parse(localStorage.getItem("survivalLog")) || [];
+  logDiv.innerHTML =
+    `<h3>Your quiet wins</h3>
+     <ul>${log.map(e => `<li>${e}</li>`).join("")}</ul>`;
+}
+</script>
+</body>
+</html>
